@@ -30,6 +30,18 @@ public_users.get('/', function (req, res) {
   }
 });
 
+// Get the book list available in the shop - using async callback function and Promise
+public_users.get('/async', async function (req, res) {
+  try {
+    const bookList = JSON.stringify({ books }, null, 4);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return res.status(200).json({ books: bookList });
+  } catch (error) {
+    return res.status(404).json({ message: `Book list not found` });
+  }
+});
+
+
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', function (req, res) {
   const isbn = req.params.isbn;
@@ -37,6 +49,19 @@ public_users.get('/isbn/:isbn', function (req, res) {
     const filterByISBN = books[isbn];
     return res.status(200).json({ book: filterByISBN });
   } else {
+    return res.status(404).json({ message: `The book with isbn ${isbn} not found` });
+  }
+});
+
+
+// Get book details based on ISBN - using async callback function and Promise
+public_users.get('/async/isbn/:isbn', async function (req, res) {
+  try {
+    const isbn = req.params.isbn;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const filterByISBN = books[isbn];
+    return res.status(200).json({ book: filterByISBN });
+  } catch (error) {
     return res.status(404).json({ message: `The book with isbn ${isbn} not found` });
   }
 });
@@ -61,6 +86,31 @@ public_users.get('/author/:author', function (req, res) {
   }
 });
 
+
+// Get book details based on author - using async callback function and Promise
+public_users.get('/async/author/:author', async function (req, res) {
+  try {
+    const author = req.params.author;
+    const filterByAuthor = [];
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    for (const isbn in books) {
+      if (books.hasOwnProperty(isbn)) {
+        const bookList = books[isbn];
+        if (bookList.author === author) {
+          filterByAuthor.push(bookList);
+        }
+      }
+    }
+    if (filterByAuthor.length > 0) {
+      return res.status(200).json({ books: filterByAuthor });
+    }
+  } catch (error) {
+    return res.status(404).json({ message: `The book with isbn '${author}' not found` });
+  }
+
+});
+
+
 // Get all books based on title
 public_users.get('/title/:title', function (req, res) {
   const title = req.params.title;
@@ -79,6 +129,29 @@ public_users.get('/title/:title', function (req, res) {
     return res.status(404).json({ message: `The book with isbn '${title}' not found` });
   }
 });
+
+// Get all books based on title - using async callback function and Promise
+public_users.get('/async/title/:title', async function (req, res) {
+  try {
+    const title = req.params.title;
+    const filterByTitle = [];
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    for (const isbn in books) {
+      if (books.hasOwnProperty(isbn)) {
+        const bookList = books[isbn];
+        if (bookList.title === title) {
+          filterByTitle.push(bookList);
+        }
+      }
+    }
+    if (filterByTitle.length > 0) {
+      return res.status(200).json({ books: filterByTitle });
+    }
+  } catch (error) {
+    return res.status(404).json({ message: `The book with isbn '${title}' not found` });
+  }
+});
+
 
 //  Get book review
 public_users.get('/review/:isbn', function (req, res) {
